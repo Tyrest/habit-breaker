@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Habit Breaker!</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Habit Breaker!</h1>
+    <h2>Websites List</h2>
+    <table id="websitesTable">
+        <thead>
+            <tr>
+                <th>Websites</th>
+            </tr>
+        </thead>
+        <tbody id="websitesList">
+            <!-- Websites will be dynamically added here -->
+        </tbody>
+    </table>
+    <button id="clearButton" class="clear-button">Clear Websites List</button>
+    <button id="addButton" class="add-button">Add Current Website</button>
+    <script src="storageUtils.js"></script>
+    <script src="popup.js"></script>
+</body>
+
+</html>

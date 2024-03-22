@@ -1,0 +1,27 @@
+{
+    "manifest_version": 3,
+    "name": "Habit Breaker",
+    "version": "1.0",
+    "description": "Prompts the user to write why they visit a website and then asks them if they want to continue. If they do, the extension will allow them to continue.",
+    "permissions": [
+        "activeTab",
+        "storage"
+    ],
+    "action": {
+        "default_popup": "popup.html",
+        "default_icon": "hello_extensions.png"
+    },
+    "background": {
+        "service_worker": "background.js"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "<all_urls>"
+            ],
+            "js": [
+                "content.js"
+            ]
+        }
+    ]
+}
