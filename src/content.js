@@ -17,6 +17,21 @@ chrome.storage.local.get('websites', function (result) {
 function showOverlay() {
     // console.debug("showOverlay()");
 
+    // Create a new style for the input-error class that shakes the text box
+    const style = document.createElement('style');
+    style.textContent = `
+        .hb-input-error {
+            position: relative;
+            animation: hb-shake .1s linear;
+            animation-iteration-count: 3;
+        }
+        @keyframes hb-shake {
+            0% { left: -2px; }
+            100% { right: -2px; }
+        }
+    `;
+    document.head.appendChild(style);
+
     // Create overlay div
     const overlay = document.createElement('div');
     overlay.style.position = 'fixed';
@@ -54,28 +69,45 @@ function showOverlay() {
     submitButton.style.borderRadius = '5px';
     submitButton.style.cursor = 'pointer';
 
-    // Add submit button click event listener
-    submitButton.addEventListener('click', function () {
+    function handleFlitSubmit() {
         // Get the value of the text box
         const inputValue = textBox.value.trim();
 
         // Check if the text box is not empty
-        if (inputValue !== '') {
+        if (inputValue !== '' && inputValue !== 'Oops! The textbox is lonely...') {
             // Save the flit in the flit dictionary
             saveFlit(inputValue);
             // Remove overlay
             overlay.remove();
         } else {
-            // Show error message in the text box
-            textBox.value = 'Oops! The textbox is lonely...';
-            textBox.style.color = 'red';
-            textBox.addEventListener('focus', function () {
-                // Clear the error message when the user focuses on the text box again
-                textBox.value = '';
-                textBox.style.color = 'initial';
-            }, { once: true });
+            // Check if the text box is not focused
+            if (document.activeElement !== textBox) {
+                // Show error message in the text box
+                textBox.value = 'Oops! The textbox is lonely...';
+                textBox.style.color = 'red';
+                textBox.addEventListener('focus', function () {
+                    // Clear the error message when the user focuses on the text box again
+                    textBox.value = '';
+                    textBox.style.color = 'initial';
+                }, { once: true });
+            }
+            // Add the class input-error to the text box for 0.3 seconds to shake it
+            textBox.classList.add('hb-input-error');
+            setTimeout(() => {
+                textBox.classList.remove('hb-input-error');
+            }, 300);
+        }
+    }
+
+    // Add event listener for key press
+    textBox.addEventListener('keypress', function (event) {
+        if (event.key === 'Enter') {
+            handleFlitSubmit();
         }
     });
+
+    // Add submit button click event listener
+    submitButton.addEventListener('click', handleFlitSubmit);
 
     // Append text input and submit button to form container
     formContainer.appendChild(textBox);
@@ -86,6 +118,9 @@ function showOverlay() {
 
     // Append overlay to body
     document.body.appendChild(overlay);
+
+    // Focus on the text box
+    textBox.focus();
 }
 
 // Appends the time and flit to the flit dictionary in storage
