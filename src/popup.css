@@ -1,0 +1,75 @@
+body {
+    font-family: Arial, sans-serif;
+    width: 300px;
+    /* Semi-fixed width */
+    margin: 0 auto;
+    /* Center the popup horizontally */
+    padding: 20px;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table-container {
+    max-height: 400px;
+    overflow-y: auto;
+    position: relative;
+}
+
+thead {
+    position: sticky;
+    top: 0;
+    background-color: white;
+    z-index: 1;
+}
+
+th,
+td {
+    padding: 8px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+}
+
+th {
+    background-color: #f2f2f2;
+}
+
+.table-button {
+    width: 20px;
+    text-align: center;
+}
+
+.clear-button,
+.add-button,
+.back-button {
+    display: block;
+    width: 100%;
+    padding: 10px 0;
+    margin: 10px 0;
+    background-color: #ff6347;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.clear-button:hover,
+.add-button:hover,
+.back-button:hover {
+    background-color: #ff5733;
+}
+
+.clickable {
+    cursor: pointer;
+}
+
+.clickable:hover {
+    text-decoration: underline;
+}

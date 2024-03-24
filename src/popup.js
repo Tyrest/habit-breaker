@@ -20,52 +20,61 @@ document.addEventListener('DOMContentLoaded', function () {
         selectedWebsiteSpan.textContent = website;
         flitTableBody.innerHTML = '';
 
-        // Fetch and display flits for the selected website
+        // Add flits for the selected website to the table
         getFlitsForWebsite(website, function (flitsForWebsite) {
-            flitsForWebsite.forEach(flit => {
+            for (let i = flitsForWebsite.length - 1; i >= 0; i--) {
+                const flit = flitsForWebsite[i];
                 const row = flitTableBody.insertRow();
                 const flitCell = row.insertCell();
                 const timeCell = row.insertCell();
                 flitCell.textContent = flit.flit;
                 timeCell.textContent = new Date(flit.time).toLocaleString();
+
                 const deleteCell = row.insertCell();
                 deleteCell.classList.add('table-button');
-                deleteCell.innerHTML = '<i class="fas fa-times"></i>';
-                deleteCell.classList.add('delete-button');
-                deleteCell.addEventListener('click', function () {
+                const deleteSpan = document.createElement('span');
+                deleteSpan.innerHTML = '<i class="fas fa-times"></i>';
+                deleteSpan.classList.add('clickable');
+                deleteSpan.addEventListener('click', function (event) {
+                    event.stopPropagation();
                     deleteFlit(website, flit.flit, function () {
                         showFlitsView(website);
                     });
                 });
-            });
+                deleteCell.appendChild(deleteSpan);
+            }
         });
     }
 
     // Function to populate websites list
     function populateWebsitesTable() {
         getWebsites(function (websites) {
-            // Clear any existing rows
             websiteTableBody.innerHTML = '';
 
             // Add each website to the table
             websites.forEach(function (website) {
                 const row = websiteTableBody.insertRow();
                 const cell = row.insertCell();
-                cell.textContent = website;
-                cell.addEventListener('click', function () {
+                const span = document.createElement('span');
+                span.textContent = website;
+                span.classList.add('clickable');
+                span.addEventListener('click', function () {
                     showFlitsView(website);
                 });
+                cell.appendChild(span);
+
                 const deleteCell = row.insertCell();
                 deleteCell.classList.add('table-button');
-                deleteCell.innerHTML = '<i class="fas fa-times"></i>';
-                deleteCell.classList.add('delete-button');
-                deleteCell.addEventListener('click', function (event) {
-                    console.debug("Delete button clicked")
+                const deleteSpan = document.createElement('span');
+                deleteSpan.innerHTML = '<i class="fas fa-times"></i>';
+                deleteSpan.classList.add('clickable');
+                deleteSpan.addEventListener('click', function (event) {
                     event.stopPropagation();
                     deleteWebsite(website, function () {
                         populateWebsitesTable();
                     });
                 });
+                deleteCell.appendChild(deleteSpan);
             });
         });
     }

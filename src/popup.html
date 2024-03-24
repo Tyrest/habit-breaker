@@ -5,96 +5,48 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Habit Breaker!</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            width: 300px;
-            /* Semi-fixed width */
-            margin: 0 auto;
-            /* Center the popup horizontally */
-            padding: 20px;
-        }
-
-        h1 {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th,
-        td {
-            padding: 8px;
-            border-bottom: 1px solid #ddd;
-            text-align: left;
-        }
-
-        th {
-            background-color: #f2f2f2;
-        }
-
-        .table-button {
-            width: 20px;
-            text-align: center;
-        }
-
-        .clear-button,
-        .add-button,
-        .back-button {
-            display: block;
-            width: 100%;
-            padding: 10px 0;
-            margin: 10px 0;
-            background-color: #ff6347;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        .clear-button:hover,
-        .add-button:hover,
-        .back-button:hover {
-            background-color: #ff5733;
-        }
-    </style>
+    <link rel="stylesheet" href="popup.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 
 <body>
     <div id="mainView">
         <h1>Habit Breaker!</h1>
-        <table id="websitesTable">
-            <thead>
-                <tr>
-                    <th>Websites</th>
-                    <th id="clearButton" class="table-button"><i class="fas fa-trash-alt"></i></th>
-                </tr>
-            </thead>
-            <tbody id="websitesList">
-                <!-- Websites will be dynamically added here -->
-            </tbody>
-        </table>
+        <h3>Click on a Website to See Its Flits!</h3>
+        <div class="table-container">
+            <table id="websitesTable">
+                <thead>
+                    <tr>
+                        <th>Website</th>
+                        <th id="clearButton" class="table-button"><span class="clickable"><i
+                                    class="fas fa-trash-alt"></i></span></th>
+                    </tr>
+                </thead>
+                <tbody id="websitesList">
+                    <!-- Websites will be dynamically added here -->
+                </tbody>
+            </table>
+        </div>
         <button id="addButton" class="add-button">Add Current Website</button>
     </div>
     <div id="flitsView" style="display: none;">
         <h1>Habit Breaker!</h1>
         <h2><span id="selectedWebsite"></span></h2>
-        <table id="flitsTable">
-            <thead>
-                <tr>
-                    <th>Flits</th>
-                    <th>Time</th>
-                    <th id="flitClearButton" class="table-button"><i class="fas fa-trash-alt"></i></th>
-                </tr>
-            </thead>
-            <tbody id="flitsList">
-                <!-- Flits will be dynamically added here -->
-            </tbody>
-        </table>
+        <div class="table-container">
+            <table id="flitsTable">
+                <thead>
+                    <tr>
+                        <th>Flit</th>
+                        <th>Time</th>
+                        <th id="flitClearButton" class="table-button"><span class="clickable"><i
+                                    class="fas fa-trash-alt"></i></span></th>
+                    </tr>
+                </thead>
+                <tbody id="flitsList">
+                    <!-- Flits will be dynamically added here -->
+                </tbody>
+            </table>
+        </div>
         <button id="backButton" class="back-button">Back</button>
     </div>
     <script src="storageUtils.js"></script>
