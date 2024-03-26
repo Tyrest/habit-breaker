@@ -2,14 +2,18 @@
     "manifest_version": 3,
     "name": "Habit Breaker",
     "version": "1.0",
-    "description": "Prompts the user to write why they visit a website and then asks them if they want to continue. If they do, the extension will allow them to continue.",
+    "description": "Tackle doom scrolling and reorient your focus towards more important tasks.",
     "permissions": [
         "activeTab",
         "storage"
     ],
     "action": {
         "default_popup": "popup.html",
-        "default_icon": "hello_extensions.png"
+        "default_icon": {
+            "16": "HabitBreaker16.png",
+            "48": "HabitBreaker48.png",
+            "128": "HabitBreaker128.png"
+        }
     },
     "content_scripts": [
         {
