@@ -1,5 +1,5 @@
 {
-    "manifest_version": 2,
+    "manifest_version": 3,
     "name": "Habit Breaker",
     "version": "0.1",
     "description": "Tackle doom scrolling and reorient your focus towards more important tasks.",
@@ -7,15 +7,18 @@
         "activeTab",
         "storage"
     ],
-    "homepage_url": "https://github.com/Tyrest/habit-breaker",
     "icons": {
-        "48": "HabitBreaker.svg",
-        "96": "HabitBreaker.svg"
+        "16": "HabitBreaker16.png",
+        "48": "HabitBreaker48.png",
+        "128": "HabitBreaker128.png"
     },
-    "browser_action": {
-        "default_icon": "HabitBreaker.svg",
-        "default_title": "Habit Breaker",
-        "default_popup": "popup.html"
+    "action": {
+        "default_popup": "popup.html",
+        "default_icon": {
+            "16": "HabitBreaker16.png",
+            "48": "HabitBreaker48.png",
+            "128": "HabitBreaker128.png"
+        }
     },
     "content_scripts": [
         {

@@ -81,8 +81,20 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Function to handle click event of the add button
     function handleAddButtonClick() {
+        let tabsAPI;
+
+        const userAgent = navigator.userAgent.toLowerCase();
+        if (userAgent.includes('chrome') && userAgent.includes('mozilla')) {
+            console.debug("Chrome Tabs API found")
+            tabsAPI = chrome.tabs;
+        } else if (userAgent.includes('firefox')) {
+            console.debug("Firefox Tabs API found")
+            tabsAPI = browser.tabs;
+        } else {
+            console.error('Tabs API not found. Extension may not be compatible with this browser.');
+        }
         // Get the current tab URL
-        chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+        tabsAPI.query({ active: true, currentWindow: true }, function (tabs) {
             const currentUrl = tabs[0].url;
             // Get only the domain name from the URL
             const url = new URL(currentUrl);

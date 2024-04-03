@@ -1,15 +1,27 @@
 console.log("On the website: " + window.location.href);
 
+function getStorageAPI() {
+    const userAgent = navigator.userAgent.toLowerCase();
+    if (userAgent.includes('chrome') && userAgent.includes('mozilla')) {
+        console.debug("Chrome Storage API found")
+        return chrome.storage.local;
+    } else if (userAgent.includes('firefox')) {
+        console.debug("Firefox Storage API found")
+        return browser.storage.local;
+    } else {
+        console.error('Storage API not found. Extension may not be compatible with this browser.');
+        return null;
+    }
+}
+
 // Check if the list of websites exists in Chrome Storage
-chrome.storage.local.get('websites', function (result) {
+getStorageAPI().get('websites', function (result) {
     const websites = result.websites || [];
     console.log("Websites list: " + websites);
 
     // Check if the current website matches any URL from the list
     if (websites.includes(window.location.hostname)) {
         console.log("Website is in the list");
-        // Send a message to the background script to show the popup
-        // chrome.runtime.sendMessage({ message: "show_popup" });
         showOverlay();
     }
 });
@@ -127,20 +139,19 @@ function showOverlay() {
 function saveFlit(flit) {
     // console.debug("Saving flit: ", flit);
 
-    chrome.storage.local.get('flits', function (result) {
+    getStorageAPI().get('flits', function (result) {
         const flits = result.flits || [];
         const currentWebsite = window.location.hostname;
         const websiteEntry = flits.find(entry => entry.website === currentWebsite);
         if (websiteEntry) {
             // console.debug("Adding new flit to existing entry in flit dictionary");
             websiteEntry.flits.push({ flit, time: new Date().toISOString() });
-            chrome.storage.local.set({ 'flits': flits });
+            getStorageAPI().set({ 'flits': flits });
         } else {
             // console.debug("Creating new entry in flit dictionary");
             flits.push({ website: currentWebsite, flits: [{ flit, time: new Date().toISOString() }] });
-            chrome.storage.local.set({ 'flits': flits });
+            getStorageAPI().set({ 'flits': flits });
         }
-        // console.debug("flits: ", flits);
     });
 }
 

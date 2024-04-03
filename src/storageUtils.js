@@ -1,12 +1,26 @@
+function getStorageAPI() {
+    const userAgent = navigator.userAgent.toLowerCase();
+    if (userAgent.includes('chrome') && userAgent.includes('mozilla')) {
+        console.debug("Chrome Storage API found")
+        return chrome.storage.local;
+    } else if (userAgent.includes('firefox')) {
+        console.debug("Firefox Storage API found")
+        return browser.storage.local;
+    } else {
+        console.error('Storage API not found. Extension may not be compatible with this browser.');
+        return null;
+    }
+}
+
 function getWebsites(callback) {
-    chrome.storage.local.get('websites', function (result) {
+    getStorageAPI().get('websites', function (result) {
         let websites = result.websites;
 
         // If the list doesn't exist, initialize it with the default list
         if (websites === undefined) {
-            websites = ['https://www.youtube.com/'];
+            websites = ['www.youtube.com'];
             // Store the default list in Chrome Storage
-            chrome.storage.local.set({ 'websites': websites });
+            getStorageAPI().set({ 'websites': websites });
         }
 
         // Call the callback function with the retrieved or initialized list
@@ -19,7 +33,7 @@ function addWebsite(website, callback) {
         if (websites.includes(website))
             return;
         websites.push(website);
-        chrome.storage.local.set({ 'websites': websites }, function () {
+        getStorageAPI().set({ 'websites': websites }, function () {
             callback();
         });
     });
@@ -28,27 +42,27 @@ function addWebsite(website, callback) {
 function deleteWebsite(website, callback) {
     getWebsites(function (websites) {
         const updatedWebsites = websites.filter(w => w !== website);
-        chrome.storage.local.set({ 'websites': updatedWebsites }, function () {
+        getStorageAPI().set({ 'websites': updatedWebsites }, function () {
             callback();
         });
     });
 }
 
 function deleteAllWebsites(callback) {
-    chrome.storage.local.set({ 'websites': [] }, function () {
+    getStorageAPI().set({ 'websites': [] }, function () {
         callback();
     });
 }
 
 function getFlits(callback) {
-    chrome.storage.local.get('flits', function (result) {
+    getStorageAPI().get('flits', function (result) {
         let flits = result.flits;
 
         // If the list doesn't exist, initialize it with an empty object
         if (flits === undefined) {
             flits = [];
             // Store the default list in Chrome Storage
-            chrome.storage.local.set({ 'flits': flits });
+            getStorageAPI().set({ 'flits': flits });
         }
 
         // Call the callback function with the retrieved or initialized list
@@ -70,7 +84,7 @@ function deleteFlit(website, flit, callback) {
         const websiteEntry = flits.find(entry => entry.website === website);
         if (websiteEntry) {
             websiteEntry.flits = websiteEntry.flits.filter(f => f.flit !== flit);
-            chrome.storage.local.set({ 'flits': flits }, function () {
+            getStorageAPI().set({ 'flits': flits }, function () {
                 callback();
             });
         }
@@ -80,7 +94,7 @@ function deleteFlit(website, flit, callback) {
 function deleteFlitsForWebsite(website, callback) {
     getFlits(function (flits) {
         const updatedFlits = flits.filter(entry => entry.website !== website);
-        chrome.storage.local.set({ 'flits': updatedFlits }, function () {
+        getStorageAPI().set({ 'flits': updatedFlits }, function () {
             callback();
         });
     });
