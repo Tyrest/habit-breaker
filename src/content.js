@@ -3,10 +3,10 @@ console.log("On the website: " + window.location.href);
 function getStorageAPI() {
     const userAgent = navigator.userAgent.toLowerCase();
     if (userAgent.includes('chrome') && userAgent.includes('mozilla')) {
-        console.debug("Chrome Storage API found")
+        // console.debug("Chrome Storage API found")
         return chrome.storage.local;
     } else if (userAgent.includes('firefox')) {
-        console.debug("Firefox Storage API found")
+        // console.debug("Firefox Storage API found")
         return browser.storage.local;
     } else {
         console.error('Storage API not found. Extension may not be compatible with this browser.');
@@ -17,11 +17,10 @@ function getStorageAPI() {
 // Check if the list of websites exists in Chrome Storage
 getStorageAPI().get('websites', function (result) {
     const websites = result.websites || [];
-    console.log("Websites list: " + websites);
 
     // Check if the current website matches any URL from the list
-    if (websites.includes(window.location.hostname)) {
-        console.log("Website is in the list");
+    const websiteEntry = websites.find(entry => window.location.hostname.includes(entry.website));
+    if (websiteEntry) {
         showOverlay();
     }
 });
@@ -56,10 +55,11 @@ function showOverlay() {
     overlay.style.display = 'flex';
     overlay.style.alignItems = 'center';
     overlay.style.justifyContent = 'center';
-    overlay.style.backdropFilter = 'blur(5px)';
+    overlay.style.backdropFilter = 'blur(25px)';
 
     // Create form container
     const formContainer = document.createElement('div');
+    formContainer.style.position = 'absolute';
     formContainer.style.backgroundColor = '#fff';
     formContainer.style.padding = '20px';
     formContainer.style.borderRadius = '10px';
@@ -82,6 +82,19 @@ function showOverlay() {
     submitButton.style.borderRadius = '5px';
     submitButton.style.cursor = 'pointer';
 
+    const titleText = document.createElement('h1');
+    titleText.style.display = 'none';
+    titleText.style.position = 'absolute';
+    titleText.textContent = 'Strict Mode';
+    titleText.style.color = '#FFF';
+    titleText.style.fontSize = '128px';
+    titleText.style.marginBottom = '20px';
+
+    function handleStrictMode() {
+        formContainer.remove();
+        titleText.style.display = 'block';
+    }
+
     function handleFlitSubmit() {
         // Get the value of the text box
         const inputValue = textBox.value.trim();
@@ -91,7 +104,18 @@ function showOverlay() {
             // Save the flit in the flit dictionary
             saveFlit(inputValue);
             // Remove overlay
-            overlay.remove();
+
+            getStorageAPI().get('websites', function (result) {
+                const websites = result.websites || [];
+                const currentWebsite = window.location.hostname;
+                const websiteEntry = websites.find(entry => currentWebsite.includes(entry.website));
+                if (websiteEntry.strict || false) {
+                    handleStrictMode();
+                }
+                else {
+                    overlay.remove();
+                }
+            });
         } else {
             // Check if the text box is not focused
             if (document.activeElement !== textBox) {
@@ -127,6 +151,7 @@ function showOverlay() {
     formContainer.appendChild(submitButton);
 
     // Append form container to overlay
+    overlay.appendChild(titleText);
     overlay.appendChild(formContainer);
 
     // Append overlay to body
@@ -153,4 +178,3 @@ function saveFlit(flit) {
         }
     });
 }
-
