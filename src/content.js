@@ -70,6 +70,7 @@ function showOverlay() {
     textBox.placeholder = 'What led you here...';
     textBox.style.width = '200px';
     textBox.style.marginRight = '10px';
+    textBox.style.color = '#000';
 
     // Create submit button
     const submitButton = document.createElement('button');
@@ -137,8 +138,6 @@ function showOverlay() {
 
 // Appends the time and flit to the flit dictionary in storage
 function saveFlit(flit) {
-    // console.debug("Saving flit: ", flit);
-
     getStorageAPI().get('flits', function (result) {
         const flits = result.flits || [];
         const currentWebsite = window.location.hostname;

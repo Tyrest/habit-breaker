@@ -1,4 +1,11 @@
 document.addEventListener('DOMContentLoaded', function () {
+    // Make sure storage is updated with the latest structure
+    function update() {
+        console.debug("Updating storage");
+        updateStorage();
+    }
+    update();
+
     // DOM elements
     const mainView = document.getElementById('mainView');
     const flitsView = document.getElementById('flitsView');
@@ -19,6 +26,11 @@ document.addEventListener('DOMContentLoaded', function () {
         flitsView.style.display = 'block';
         selectedWebsiteSpan.textContent = website;
         flitTableBody.innerHTML = '';
+
+        // Set checkbox to strict status
+        getStrictMode(website, function (strict) {
+            document.getElementById('strictCheckbox').checked = strict;
+        });
 
         // Add flits for the selected website to the table
         getFlitsForWebsite(website, function (flitsForWebsite) {
@@ -56,10 +68,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 const row = websiteTableBody.insertRow();
                 const cell = row.insertCell();
                 const span = document.createElement('span');
-                span.textContent = website;
+                span.textContent = website.website;
                 span.classList.add('clickable');
                 span.addEventListener('click', function () {
-                    showFlitsView(website);
+                    showFlitsView(website.website);
                 });
                 cell.appendChild(span);
 
@@ -70,7 +82,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 deleteSpan.classList.add('clickable');
                 deleteSpan.addEventListener('click', function (event) {
                     event.stopPropagation();
-                    deleteWebsite(website, function () {
+                    deleteWebsite(website.website, function () {
                         populateWebsitesTable();
                     });
                 });
@@ -123,6 +135,10 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    function handleStrictCheckboxChange(event) {
+        setStrictMode(selectedWebsiteSpan.textContent, event.target.checked, function () {});
+    }
+
     // Populate websites list on popup open
     populateWebsitesTable();
 
@@ -130,6 +146,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('addButton').addEventListener('click', handleAddButtonClick);
     document.getElementById('clearButton').addEventListener('click', handleClearButtonClick);
     document.getElementById('flitClearButton').addEventListener('click', handleFlitClearButtonClick);
+    document.getElementById('strictCheckbox').addEventListener('change', handleStrictCheckboxChange);
 
     // Event listener for "back" button (return to main view)
     const backButton = document.getElementById('backButton');

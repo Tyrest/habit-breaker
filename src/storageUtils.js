@@ -1,10 +1,10 @@
 function getStorageAPI() {
     const userAgent = navigator.userAgent.toLowerCase();
     if (userAgent.includes('chrome') && userAgent.includes('mozilla')) {
-        console.debug("Chrome Storage API found")
+        // console.debug("Chrome Storage API found")
         return chrome.storage.local;
     } else if (userAgent.includes('firefox')) {
-        console.debug("Firefox Storage API found")
+        // console.debug("Firefox Storage API found")
         return browser.storage.local;
     } else {
         console.error('Storage API not found. Extension may not be compatible with this browser.');
@@ -18,10 +18,12 @@ function getWebsites(callback) {
 
         // If the list doesn't exist, initialize it with the default list
         if (websites === undefined) {
-            websites = ['www.youtube.com'];
+            websites = [{ 'website': 'www.youtube.com' }];
             // Store the default list in Chrome Storage
             getStorageAPI().set({ 'websites': websites });
         }
+
+        console.debug("getWebsites(): ", websites);
 
         // Call the callback function with the retrieved or initialized list
         callback(websites || []);
@@ -32,7 +34,7 @@ function addWebsite(website, callback) {
     getWebsites(function (websites) {
         if (websites.includes(website))
             return;
-        websites.push(website);
+        websites.push({ 'website': website });
         getStorageAPI().set({ 'websites': websites }, function () {
             callback();
         });
@@ -97,5 +99,34 @@ function deleteFlitsForWebsite(website, callback) {
         getStorageAPI().set({ 'flits': updatedFlits }, function () {
             callback();
         });
+    });
+}
+
+function getStrictMode(website, callback) {
+    getWebsites(function (websites) {
+        const websiteEntry = websites.find(w => w.website === website);
+        callback(websiteEntry.strict || false);
+    });
+}
+
+function setStrictMode(website, strict, callback) {
+    getWebsites(function (websites) {
+        const websiteEntry = websites.find(w => w.website === website);
+        websiteEntry.strict = strict;
+
+        getStorageAPI().set({ 'websites': websites }, function () {
+            callback();
+        });
+    });
+}
+
+// If there are still string entries in the websites list, convert them to objects with a website property
+function updateStorage() {
+    getStorageAPI().get('websites', function (result) {
+        const websites = result.websites;
+        if (websites) {
+            const updatedWebsites = websites.map(w => typeof w === 'string' ? { website: w } : w);
+            getStorageAPI().set({ 'websites': updatedWebsites });
+        }
     });
 }
