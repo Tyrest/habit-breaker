@@ -34,6 +34,17 @@
         <h2><span id="selectedWebsite"></span></h2>
         <input type="checkbox" id="strictCheckbox">
         <label for="strictCheckbox">Strict (close tab after writing flit)</label>
+        <div class="horizontal-select">
+            <input type="radio" id="relaxedOption" name="options" checked>
+            <label for="relaxedOption">Relaxed</label>
+
+            <input type="radio" id="defaultOption" name="options">
+            <label for="defaultOption">Default</label>
+
+            <input type="radio" id="strictOption" name="options">
+            <label for="strictOption">Strict</label>
+        </div>
+
         <div class="table-container">
             <table id="flitsTable">
                 <thead>
