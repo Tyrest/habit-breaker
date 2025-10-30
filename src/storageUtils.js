@@ -43,7 +43,7 @@ function addWebsite(website, callback) {
 
 function deleteWebsite(website, callback) {
     getWebsites(function (websites) {
-        const updatedWebsites = websites.filter(w => w !== website);
+        const updatedWebsites = websites.filter(w => w.website !== website);
         getStorageAPI().set({ 'websites': updatedWebsites }, function () {
             callback();
         });
@@ -102,21 +102,23 @@ function deleteFlitsForWebsite(website, callback) {
     });
 }
 
-function getStrictMode(website, callback) {
+function getMode(website, callback) {
     getWebsites(function (websites) {
         const websiteEntry = websites.find(w => w.website === website);
-        callback(websiteEntry.strict || false);
+        // Default to 'default' mode if not set
+        callback(websiteEntry && websiteEntry.mode ? websiteEntry.mode : 'default');
     });
 }
 
-function setStrictMode(website, strict, callback) {
+function setMode(website, mode, callback) {
     getWebsites(function (websites) {
         const websiteEntry = websites.find(w => w.website === website);
-        websiteEntry.strict = strict;
-
-        getStorageAPI().set({ 'websites': websites }, function () {
-            callback();
-        });
+        if (websiteEntry) {
+            websiteEntry.mode = mode;
+            getStorageAPI().set({ 'websites': websites }, function () {
+                callback();
+            });
+        }
     });
 }
 

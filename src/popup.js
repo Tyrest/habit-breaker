@@ -27,9 +27,15 @@ document.addEventListener('DOMContentLoaded', function () {
         selectedWebsiteSpan.textContent = website;
         flitTableBody.innerHTML = '';
 
-        // Set checkbox to strict status
-        getStrictMode(website, function (strict) {
-            document.getElementById('strictCheckbox').checked = strict;
+        // Set radio buttons to current mode
+        getMode(website, function (mode) {
+            if (mode === 'relaxed') {
+                document.getElementById('relaxedOption').checked = true;
+            } else if (mode === 'strict') {
+                document.getElementById('strictOption').checked = true;
+            } else {
+                document.getElementById('defaultOption').checked = true;
+            }
         });
 
         // Add flits for the selected website to the table
@@ -135,8 +141,11 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    function handleStrictCheckboxChange(event) {
-        setStrictMode(selectedWebsiteSpan.textContent, event.target.checked, function () {});
+    function handleModeChange(event) {
+        const selectedMode = event.target.id.replace('Option', '').toLowerCase();
+        setMode(selectedWebsiteSpan.textContent, selectedMode, function () {
+            console.debug("Mode changed to: " + selectedMode);
+        });
     }
 
     // Populate websites list on popup open
@@ -146,7 +155,11 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('addButton').addEventListener('click', handleAddButtonClick);
     document.getElementById('clearButton').addEventListener('click', handleClearButtonClick);
     document.getElementById('flitClearButton').addEventListener('click', handleFlitClearButtonClick);
-    document.getElementById('strictCheckbox').addEventListener('change', handleStrictCheckboxChange);
+    
+    // Add event listeners for mode radio buttons
+    document.getElementById('relaxedOption').addEventListener('change', handleModeChange);
+    document.getElementById('defaultOption').addEventListener('change', handleModeChange);
+    document.getElementById('strictOption').addEventListener('change', handleModeChange);
 
     // Event listener for "back" button (return to main view)
     const backButton = document.getElementById('backButton');

@@ -1,12 +1,21 @@
+// ============================================================================
+// Habit Breaker Content Script
+// ============================================================================
+
 console.log("On the website: " + window.location.href);
 
+// ============================================================================
+// Utility Functions
+// ============================================================================
+
+/**
+ * Get the appropriate storage API for the current browser
+ */
 function getStorageAPI() {
     const userAgent = navigator.userAgent.toLowerCase();
     if (userAgent.includes('chrome') && userAgent.includes('mozilla')) {
-        // console.debug("Chrome Storage API found")
         return chrome.storage.local;
     } else if (userAgent.includes('firefox')) {
-        // console.debug("Firefox Storage API found")
         return browser.storage.local;
     } else {
         console.error('Storage API not found. Extension may not be compatible with this browser.');
@@ -14,36 +23,47 @@ function getStorageAPI() {
     }
 }
 
-// Check if the list of websites exists in Chrome Storage
-getStorageAPI().get('websites', function (result) {
-    const websites = result.websites || [];
-
-    // Check if the current website matches any URL from the list
-    const websiteEntry = websites.find(entry => window.location.hostname.includes(entry.website));
-    if (websiteEntry) {
-        showOverlay();
-    }
-});
-
-function showOverlay() {
-    // console.debug("showOverlay()");
-
-    // Create a new style for the input-error class that shakes the text box
-    const style = document.createElement('style');
-    style.textContent = `
-        .hb-input-error {
-            position: relative;
-            animation: hb-shake .1s linear;
-            animation-iteration-count: 3;
+/**
+ * Save a flit (reason for visiting) to storage
+ */
+function saveFlit(flit) {
+    getStorageAPI().get('flits', function (result) {
+        const flits = result.flits || [];
+        const currentWebsite = window.location.hostname;
+        const websiteEntry = flits.find(entry => entry.website === currentWebsite);
+        
+        if (websiteEntry) {
+            websiteEntry.flits.push({ flit, time: new Date().toISOString() });
+        } else {
+            flits.push({ website: currentWebsite, flits: [{ flit, time: new Date().toISOString() }] });
         }
-        @keyframes hb-shake {
-            0% { left: -2px; }
-            100% { right: -2px; }
-        }
-    `;
-    document.head.appendChild(style);
+        
+        getStorageAPI().set({ 'flits': flits });
+    });
+}
 
-    // Create overlay div
+// ============================================================================
+// CSS Styles
+// ============================================================================
+
+/**
+ * Inject CSS link for animations and UI elements
+ */
+function injectStyles() {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = chrome.runtime.getURL('content.css');
+    document.head.appendChild(link);
+}
+
+// ============================================================================
+// DOM Element Creation
+// ============================================================================
+
+/**
+ * Create the main overlay element
+ */
+function createOverlay() {
     const overlay = document.createElement('div');
     overlay.style.position = 'fixed';
     overlay.style.top = '0';
@@ -56,23 +76,39 @@ function showOverlay() {
     overlay.style.alignItems = 'center';
     overlay.style.justifyContent = 'center';
     overlay.style.backdropFilter = 'blur(25px)';
+    return overlay;
+}
 
-    // Create form container
+/**
+ * Create the form container with input and submit button
+ */
+function createFormContainer() {
     const formContainer = document.createElement('div');
     formContainer.style.position = 'absolute';
     formContainer.style.backgroundColor = '#fff';
     formContainer.style.padding = '20px';
     formContainer.style.borderRadius = '10px';
+    formContainer.style.display = 'none';
+    return formContainer;
+}
 
-    // Create text input
+/**
+ * Create the text input field
+ */
+function createTextInput() {
     const textBox = document.createElement('input');
     textBox.type = 'text';
     textBox.placeholder = 'What led you here...';
     textBox.style.width = '200px';
     textBox.style.marginRight = '10px';
     textBox.style.color = '#000';
+    return textBox;
+}
 
-    // Create submit button
+/**
+ * Create the submit button
+ */
+function createSubmitButton() {
     const submitButton = document.createElement('button');
     submitButton.textContent = 'Submit';
     submitButton.style.padding = '10px 20px';
@@ -81,7 +117,13 @@ function showOverlay() {
     submitButton.style.border = 'none';
     submitButton.style.borderRadius = '5px';
     submitButton.style.cursor = 'pointer';
+    return submitButton;
+}
 
+/**
+ * Create the strict mode title text
+ */
+function createStrictModeTitle() {
     const titleText = document.createElement('h1');
     titleText.style.display = 'none';
     titleText.style.position = 'absolute';
@@ -89,92 +131,164 @@ function showOverlay() {
     titleText.style.color = '#FFF';
     titleText.style.fontSize = '128px';
     titleText.style.marginBottom = '20px';
+    return titleText;
+}
 
+/**
+ * Create the breathing animation elements
+ */
+function createBreathingAnimation() {
+    const breathingContainer = document.createElement('div');
+    breathingContainer.className = 'hb-breathing-container';
+    
+    const breathingCircle = document.createElement('div');
+    breathingCircle.className = 'hb-breathing-circle';
+    
+    const breathingText = document.createElement('div');
+    breathingText.className = 'hb-breathing-text';
+    breathingText.textContent = 'Breathe In';
+    
+    // Change text at the right moment
+    setTimeout(() => {
+        breathingText.textContent = 'Breathe Out';
+    }, 3600);
+    
+    breathingContainer.appendChild(breathingCircle);
+    breathingContainer.appendChild(breathingText);
+    
+    return breathingContainer;
+}
+
+// ============================================================================
+// Event Handlers
+// ============================================================================
+
+/**
+ * Handle input validation and error display
+ */
+function handleInputError(textBox) {
+    if (document.activeElement !== textBox) {
+        textBox.value = 'Oops! The textbox is lonely...';
+        textBox.style.color = 'red';
+        textBox.addEventListener('focus', function () {
+            textBox.value = '';
+            textBox.style.color = 'initial';
+        }, { once: true });
+    }
+    
+    textBox.classList.add('hb-input-error');
+    setTimeout(() => {
+        textBox.classList.remove('hb-input-error');
+    }, 300);
+}
+
+/**
+ * Handle the overlay display based on mode
+ */
+function showOverlay() {
+    injectStyles();
+    
+    const overlay = createOverlay();
+    const formContainer = createFormContainer();
+    const textBox = createTextInput();
+    const submitButton = createSubmitButton();
+    const titleText = createStrictModeTitle();
+    
+    // Handle strict mode display
     function handleStrictMode() {
         formContainer.remove();
         titleText.style.display = 'block';
     }
-
+    
+    // Handle flit submission
     function handleFlitSubmit() {
-        // Get the value of the text box
         const inputValue = textBox.value.trim();
-
-        // Check if the text box is not empty
+        
         if (inputValue !== '' && inputValue !== 'Oops! The textbox is lonely...') {
-            // Save the flit in the flit dictionary
             saveFlit(inputValue);
-            // Remove overlay
-
+            
             getStorageAPI().get('websites', function (result) {
                 const websites = result.websites || [];
                 const currentWebsite = window.location.hostname;
                 const websiteEntry = websites.find(entry => currentWebsite.includes(entry.website));
-                if (websiteEntry.strict || false) {
+                const mode = websiteEntry && websiteEntry.mode ? websiteEntry.mode : 'default';
+                
+                if (mode === 'strict') {
                     handleStrictMode();
-                }
-                else {
-                    overlay.remove();
+                } else {
+                    overlay.classList.add('hb-fade-out');
+                    setTimeout(() => overlay.remove(), 500);
                 }
             });
         } else {
-            // Check if the text box is not focused
-            if (document.activeElement !== textBox) {
-                // Show error message in the text box
-                textBox.value = 'Oops! The textbox is lonely...';
-                textBox.style.color = 'red';
-                textBox.addEventListener('focus', function () {
-                    // Clear the error message when the user focuses on the text box again
-                    textBox.value = '';
-                    textBox.style.color = 'initial';
-                }, { once: true });
-            }
-            // Add the class input-error to the text box for 0.3 seconds to shake it
-            textBox.classList.add('hb-input-error');
-            setTimeout(() => {
-                textBox.classList.remove('hb-input-error');
-            }, 300);
+            handleInputError(textBox);
         }
     }
-
-    // Add event listener for key press
+    
+    // Add event listeners
     textBox.addEventListener('keypress', function (event) {
         if (event.key === 'Enter') {
             handleFlitSubmit();
         }
     });
-
-    // Add submit button click event listener
     submitButton.addEventListener('click', handleFlitSubmit);
-
-    // Append text input and submit button to form container
+    
+    // Build form
     formContainer.appendChild(textBox);
     formContainer.appendChild(submitButton);
-
-    // Append form container to overlay
     overlay.appendChild(titleText);
     overlay.appendChild(formContainer);
-
-    // Append overlay to body
     document.body.appendChild(overlay);
-
-    // Focus on the text box
-    textBox.focus();
+    
+    // Initialize based on mode
+    initializeOverlayByMode(overlay, formContainer, textBox);
 }
 
-// Appends the time and flit to the flit dictionary in storage
-function saveFlit(flit) {
-    getStorageAPI().get('flits', function (result) {
-        const flits = result.flits || [];
+/**
+ * Initialize overlay behavior based on website mode
+ */
+function initializeOverlayByMode(overlay, formContainer, textBox) {
+    getStorageAPI().get('websites', function (result) {
+        const websites = result.websites || [];
         const currentWebsite = window.location.hostname;
-        const websiteEntry = flits.find(entry => entry.website === currentWebsite);
-        if (websiteEntry) {
-            // console.debug("Adding new flit to existing entry in flit dictionary");
-            websiteEntry.flits.push({ flit, time: new Date().toISOString() });
-            getStorageAPI().set({ 'flits': flits });
+        const websiteEntry = websites.find(entry => currentWebsite.includes(entry.website));
+        const mode = websiteEntry && websiteEntry.mode ? websiteEntry.mode : 'default';
+        
+        if (mode === 'relaxed') {
+            // Show form immediately in relaxed mode
+            formContainer.style.display = 'block';
+            textBox.focus();
         } else {
-            // console.debug("Creating new entry in flit dictionary");
-            flits.push({ website: currentWebsite, flits: [{ flit, time: new Date().toISOString() }] });
-            getStorageAPI().set({ 'flits': flits });
+            // Show breathing animation first in default/strict mode
+            const breathingContainer = createBreathingAnimation();
+            overlay.appendChild(breathingContainer);
+            
+            setTimeout(() => {
+                breathingContainer.remove();
+                formContainer.style.display = 'block';
+                textBox.focus();
+            }, 8000);
         }
     });
 }
+
+// ============================================================================
+// Initialization
+// ============================================================================
+
+/**
+ * Check if current website is in the monitored list and show overlay if needed
+ */
+function init() {
+    getStorageAPI().get('websites', function (result) {
+        const websites = result.websites || [];
+        const websiteEntry = websites.find(entry => window.location.hostname.includes(entry.website));
+        
+        if (websiteEntry) {
+            showOverlay();
+        }
+    });
+}
+
+// Start the extension
+init();
